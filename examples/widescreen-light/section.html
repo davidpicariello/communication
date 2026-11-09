@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Section divider example</title>
+  <style>
+* { box-sizing: border-box; }
+
+html, body { width: 100%; height: 100%; margin: 0; }
+body {
+  --background: #f4f6fa;
+  --foreground: #18202e;
+  --muted: #657187;
+  --accent: #4a62d8;
+  --surface: #ffffff;
+  --rule: #dce2ed;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--foreground);
+  background: #101522;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.deck { position: relative; width: min(96vw, 96vh * var(--ratio)); aspect-ratio: var(--ratio); }
+.slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow: hidden;
+  padding: 7.5% 8%;
+  color: var(--foreground);
+  background: var(--background);
+}
+.slide.active { display: flex; flex-direction: column; }
+h1, h2, h3, p, blockquote { margin-top: 0; }
+h1, h2, h3 { line-height: 1.08; letter-spacing: -0.035em; }
+h1 { max-width: 90%; font-size: 72px; }
+h2 { margin-bottom: 5%; font-size: 48px; }
+h3 { margin-bottom: 1rem; font-size: 36px; }
+p, li { line-height: 1.45; }
+.eyebrow { color: var(--accent); font-size: 1rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.subtitle { color: var(--muted); font-size: 28px; }
+.title-slide, .section-slide, .quote-slide, .statistic-slide { display: flex; flex: 1; flex-direction: column; justify-content: center; }
+.title-slide h1 { margin: .2em 0; }
+.content-slide { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.content-slide h2 { flex: 0 0 auto; }
+.intro { color: var(--muted); font-size: 24px; }
+.bullet-list { display: grid; gap: .65em; margin: .3em 0 0; padding-left: 1.2em; font-size: 26px; }
+.bullet-list li::marker { color: var(--accent); }
+.agenda-list { display: grid; gap: .35em; margin: .3em 0 0; padding: 0; list-style: none; font-size: 26px; }
+.agenda-list li { display: grid; grid-template-columns: .6em 1fr; align-items: center; gap: .7em; padding: .35em 0; border-bottom: 1px solid var(--rule); }
+.agenda-list li::before { width: .45em; height: .45em; border-radius: 50%; background: var(--accent); content: ""; }
+.timeline-list { display: grid; flex: 1; min-height: 0; margin: .3em 0 0; padding: .2em 0 0 .8em; list-style: none; counter-reset: timeline; font-size: 25px; }
+.timeline-list li { position: relative; padding: 0 0 .85em 2em; border-left: 2px solid var(--rule); }
+.timeline-list li::before { position: absolute; top: 0; left: -1.05em; display: grid; width: 2em; height: 2em; place-items: center; border-radius: 50%; color: white; background: var(--accent); content: counter(timeline, decimal-leading-zero); counter-increment: timeline; font-size: .65em; font-weight: 800; }
+.timeline-list li:last-child { border-left-color: transparent; }
+.columns { display: grid; flex: 1; grid-template-columns: 1fr 1fr; gap: 5%; min-height: 0; }
+.column { overflow: hidden; padding: 5%; border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); }
+.column p, .column ul { font-size: 26px; }
+.comparison .column:first-child { border-top: 6px solid var(--accent); }
+.comparison .column:last-child { border-top: 6px solid var(--muted); }
+.image-text { display: grid; flex: 1; grid-template-columns: 1fr 1fr; align-items: center; gap: 6%; min-height: 0; }
+.image-text img { width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; }
+.image-text p { font-size: 25px; }
+.quote-slide blockquote { max-width: 90%; margin: 0 0 1em; font-size: 48px; font-weight: 650; line-height: 1.2; }
+.attribution { color: var(--muted); font-size: 18px; }
+.statistic-value { margin-bottom: .15em; color: var(--accent); font-size: 88px; font-weight: 800; line-height: 1; }
+.statistic-description { max-width: 75%; font-size: 30px; }
+.controls { position: fixed; z-index: 10; right: 20px; bottom: 18px; display: flex; align-items: center; gap: 12px; padding: 7px; border: 1px solid #ffffff30; border-radius: 999px; color: white; background: #111827d9; font: 14px/1 system-ui, sans-serif; }
+.controls button { width: 34px; height: 34px; border: 0; border-radius: 50%; color: white; background: #ffffff20; font-size: 20px; cursor: pointer; }
+.controls button:hover, .controls button:focus-visible { background: var(--accent); outline: none; }
+.slide-picker { position: absolute; right: 0; bottom: calc(100% + 8px); display: grid; gap: 0; width: min(360px, calc(100vw - 32px)); max-height: 80vh; overflow-y: auto; margin: 0; padding: 8px; border: 1px solid #ffffff30; border-radius: 14px; background: #111827f2; box-shadow: 0 12px 32px #0005; }
+.slide-picker[hidden] { display: none; }
+.slide-picker button { width: 100%; height: auto; overflow: hidden; padding: 10px 12px; border-radius: 8px; background: transparent; font: 14px/1.35 system-ui, sans-serif; text-align: left; white-space: nowrap; text-overflow: ellipsis; }
+.slide-picker button:hover, .slide-picker button:focus-visible, .slide-picker button[aria-current="true"] { background: var(--accent); outline: none; }
+@media print {
+  @page { size: landscape; margin: 0; }
+  html, body { display: block; height: auto; overflow: visible; background: white; }
+  .deck { width: auto; height: auto; }
+  .slide, .slide.active { position: relative; display: flex; width: 100vw; aspect-ratio: var(--ratio); break-after: page; }
+  .controls { display: none; }
+}
+
+body[data-theme="light"] { --background: #f4f6fa; --foreground: #18202e; --muted: #657187; --accent: #4a62d8; --surface: #fff; --rule: #dce2ed; }
+
+:root { --ratio: 16 / 9; }
+
+</style>
+</head>
+<body data-theme="light">
+  <main class="deck" aria-label="Section divider example">
+<section class="slide layout-section">
+<div class="section-slide">
+  <p class="eyebrow">Next section</p>
+  <h1>Start with the highest-risk streets</h1>
+  <p class="subtitle">Use evidence to prioritize quick wins</p>
+</div>
+</section>
+  </main>
+    <script type="application/json" id="presentation-source">{"title": "Section divider example", "theme": "light", "size": "widescreen", "slides": [{"layout": "section", "values": {"title": "Start with the highest-risk streets", "subtitle": "Use evidence to prioritize quick wins"}}]}</script>
+  <nav class="controls" aria-label="Presentation controls">
+    <button type="button" id="previous" aria-label="Previous slide">←</button>
+    <span id="counter" role="button" tabindex="0" aria-label="Choose a slide" aria-haspopup="true" aria-expanded="false" aria-controls="slide-picker" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide">→</button>
+    <div id="slide-picker" class="slide-picker" role="group" aria-label="Choose a slide" hidden></div>
+  </nav>
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      let current = 0;
+      const counter = document.getElementById('counter');
+      const controls = document.querySelector('.controls');
+      const picker = document.getElementById('slide-picker');
+      const choices = slides.map((slide, index) => {
+        const heading = slide.querySelector('h1, h2, h3, blockquote, .statistic-value');
+        const label = heading?.textContent.trim().replace(/\s+/g, ' ').slice(0, 80) || `Slide ${index + 1}`;
+        const choice = document.createElement('button');
+        choice.type = 'button';
+        choice.className = 'slide-choice';
+        choice.textContent = `${index + 1}. ${label}`;
+        choice.setAttribute('aria-label', `Go to slide ${index + 1}: ${label}`);
+        choice.addEventListener('click', () => {
+          show(index);
+          setPickerOpen(false);
+        });
+        picker.append(choice);
+        return choice;
+      });
+      function setPickerOpen(open) {
+        picker.hidden = !open;
+        counter.setAttribute('aria-expanded', String(open));
+      }
+      function show(index) {
+        current = Math.max(0, Math.min(index, slides.length - 1));
+        slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+        choices.forEach((choice, i) => choice.setAttribute('aria-current', String(i === current)));
+        counter.textContent = `${current + 1} / ${slides.length}`;
+      }
+      controls.addEventListener('click', (event) => {
+        if (event.target.closest('button')) return;
+        setPickerOpen(picker.hidden);
+      });
+      document.addEventListener('click', (event) => {
+        if (picker.hidden || picker.contains(event.target)) return;
+        if (controls.contains(event.target) && !event.target.closest('button')) return;
+        setPickerOpen(false);
+      });
+      counter.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          event.stopPropagation();
+          setPickerOpen(picker.hidden);
+        }
+      });
+      document.getElementById('previous').addEventListener('click', () => show(current - 1));
+      document.getElementById('next').addEventListener('click', () => show(current + 1));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !picker.hidden) { setPickerOpen(false); return; }
+        if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(current + 1); }
+        if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); show(current - 1); }
+        if (event.key === 'Home') show(0);
+        if (event.key === 'End') show(slides.length - 1);
+      });
+      show(0);
+    })();
+  </script>
+</body>
+</html>
