@@ -8,49 +8,47 @@ import html
 import argparse
 import json
 import mimetypes
-import re
 import sys
 from pathlib import Path
+
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = ROOT / "templates"
 STYLE_DIR = ROOT / "styles"
-THEMES = {"clean", "dark"}
-SIZES = {"widescreen", "standard"}
+THEMES = {path.stem for path in (STYLE_DIR / "themes").glob("*.css")}
+SIZES = {path.stem for path in (STYLE_DIR / "sizes").glob("*.css")}
 
 
 def read_template(path: Path) -> dict:
-    """Read simple YAML-like metadata from an HTML comment at file start."""
-    text = path.read_text(encoding="utf-8")
-    match = re.match(r"\s*<!--\s*\n(.*?)\n\s*-->\s*\n(.*)", text, re.S)
-    if not match:
-        raise ValueError(f"{path.name}: missing metadata comment")
-    metadata: dict[str, object] = {"fields": []}
-    current_field: dict[str, str] | None = None
-    for line in match.group(1).splitlines():
-        stripped = line.strip()
-        if stripped.startswith("- "):
-            current_field = {}
-            metadata["fields"].append(current_field)  # type: ignore[union-attr]
-            stripped = stripped[2:]
-        if ":" in stripped:
-            key, value = stripped.split(":", 1)
-            if key.strip() == "fields":
-                current_field = None
-                metadata["fields"] = []
-                continue
-            target = current_field if current_field is not None and key in {"name", "label", "type", "required", "placeholder"} else metadata
-            target[key.strip()] = value.strip().strip('"\'')
-    metadata["body"] = match.group(2).strip()
+    """Read layout metadata and HTML markup from a safe YAML document."""
+    try:
+        metadata = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as error:
+        raise ValueError(f"{path.name}: invalid YAML: {error}") from error
+    if not isinstance(metadata, dict):
+        raise ValueError(f"{path.name}: template must be a mapping")
+    for key in ("name", "description", "body"):
+        if not isinstance(metadata.get(key), str) or not metadata[key].strip():
+            raise ValueError(f"{path.name}: '{key}' must be a non-empty string")
+    fields = metadata.get("fields")
+    if not isinstance(fields, list) or any(not isinstance(field, dict) for field in fields):
+        raise ValueError(f"{path.name}: 'fields' must be a list of mappings")
+    for field in fields:
+        if not isinstance(field.get("name"), str) or not field["name"].strip():
+            raise ValueError(f"{path.name}: each field requires a non-empty string 'name'")
+        if not isinstance(field.get("required", True), bool):
+            raise ValueError(f"{path.name}: field '{field['name']}' requires a boolean 'required'")
+    metadata["body"] = metadata["body"].strip()
     metadata["id"] = path.stem
     return metadata
 
 
 def templates() -> list[dict]:
-    result = [read_template(path) for path in sorted(TEMPLATE_DIR.glob("*.html")) if path.name != "index.html"]
+    result = [read_template(path) for path in sorted(TEMPLATE_DIR.glob("*.yaml"))]
     if not result:
-        raise RuntimeError(f"No HTML templates found in {TEMPLATE_DIR}")
-    preferred_order = ["title", "section", "text-bullets", "two-column", "comparison", "image-text", "quote", "statistic"]
+        raise RuntimeError(f"No YAML templates found in {TEMPLATE_DIR}")
+    preferred_order = ["title", "agenda", "section", "text-bullets", "two-column", "comparison", "timeline", "image-text", "quote", "statistic"]
     rank = {name: index for index, name in enumerate(preferred_order)}
     return sorted(result, key=lambda item: rank.get(str(item["id"]), len(rank)))
 
@@ -95,6 +93,20 @@ def render_slide(template: dict, values: dict[str, object]) -> str:
     return f'<section class="slide layout-{esc(template["id"])}">\n{body}\n</section>'
 
 
+def field_limit(field: dict, key: str) -> int | None:
+    """Read and validate a numeric field limit from template metadata."""
+    raw_limit = field.get(key)
+    if raw_limit is None:
+        return None
+    try:
+        limit = int(raw_limit)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"Template field '{field.get('name')}' has an invalid {key} limit") from error
+    if limit < 0:
+        raise ValueError(f"Template field '{field.get('name')}' has a negative {key} limit")
+    return limit
+
+
 def validate_source(source: object) -> dict:
     """Validate and normalize a JSON presentation source document."""
     if not isinstance(source, dict):
@@ -102,7 +114,7 @@ def validate_source(source: object) -> dict:
     title = source.get("title")
     if not isinstance(title, str) or not title.strip():
         raise ValueError("'title' must be a non-empty string")
-    theme = source.get("theme", "clean")
+    theme = source.get("theme", "light")
     if theme not in THEMES:
         raise ValueError(f"'theme' must be one of: {', '.join(sorted(THEMES))}")
     size = source.get("size", "widescreen")
@@ -136,15 +148,34 @@ def validate_source(source: object) -> dict:
         normalized: dict[str, object] = {}
         for name, field in known_fields.items():
             value = values.get(name, "")
-            required = field.get("required", "true").lower() not in {"false", "no", "0"}
+            required = field.get("required", True)
             if required and (value is None or value == "" or value == []):
                 raise ValueError(f"Slide {index} ({layout}) requires '{name}'")
             field_type = field.get("type", "text")
             if field_type == "bullets":
                 if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
                     raise ValueError(f"Slide {index} field '{name}' must be an array of strings")
+                max_items = field_limit(field, "max_items")
+                if max_items is not None and len(value) > max_items:
+                    raise ValueError(
+                        f"Slide {index} ({layout}) field '{name}' has {len(value)} items; maximum is {max_items}"
+                    )
+                max_item_chars = field_limit(field, "max_item_chars")
+                if max_item_chars is not None:
+                    for item_index, item in enumerate(value, start=1):
+                        if len(item) > max_item_chars:
+                            raise ValueError(
+                                f"Slide {index} ({layout}) field '{name}' item {item_index} has {len(item)} characters; "
+                                f"maximum is {max_item_chars}"
+                            )
             elif not isinstance(value, str):
                 raise ValueError(f"Slide {index} field '{name}' must be a string")
+            else:
+                max_chars = field_limit(field, "max_chars")
+                if max_chars is not None and len(value) > max_chars:
+                    raise ValueError(
+                        f"Slide {index} ({layout}) field '{name}' has {len(value)} characters; maximum is {max_chars}"
+                    )
             normalized[name] = value
         slides.append({"layout": layout, "values": normalized})
     return {"title": title, "theme": theme, "size": size, "slides": slides}
@@ -192,45 +223,69 @@ def make_deck(title: str, theme: str, size: str, slides: list[str], *, source_da
   <main class="deck" aria-label="{title_html}">
 {slides_html}
   </main>
-{source_html}  <nav class="controls" aria-label="Presentation controls">
+  {source_html}  <nav class="controls" aria-label="Presentation controls">
     <button type="button" id="previous" aria-label="Previous slide">←</button>
-    <span id="counter" aria-live="polite"></span>
+    <span id="counter" role="button" tabindex="0" aria-label="Choose a slide" aria-haspopup="true" aria-expanded="false" aria-controls="slide-picker" aria-live="polite"></span>
     <button type="button" id="next" aria-label="Next slide">→</button>
+    <div id="slide-picker" class="slide-picker" role="group" aria-label="Choose a slide" hidden></div>
   </nav>
   <script>
     (() => {{
       const slides = [...document.querySelectorAll('.slide')];
       let current = 0;
       const counter = document.getElementById('counter');
+      const controls = document.querySelector('.controls');
+      const picker = document.getElementById('slide-picker');
+      const choices = slides.map((slide, index) => {{
+        const heading = slide.querySelector('h1, h2, h3, blockquote, .statistic-value');
+        const label = heading?.textContent.trim().replace(/\\s+/g, ' ').slice(0, 80) || `Slide ${{index + 1}}`;
+        const choice = document.createElement('button');
+        choice.type = 'button';
+        choice.className = 'slide-choice';
+        choice.textContent = `${{index + 1}}. ${{label}}`;
+        choice.setAttribute('aria-label', `Go to slide ${{index + 1}}: ${{label}}`);
+        choice.addEventListener('click', () => {{
+          show(index);
+          setPickerOpen(false);
+        }});
+        picker.append(choice);
+        return choice;
+      }});
+      function setPickerOpen(open) {{
+        picker.hidden = !open;
+        counter.setAttribute('aria-expanded', String(open));
+      }}
       function show(index) {{
         current = Math.max(0, Math.min(index, slides.length - 1));
         slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+        choices.forEach((choice, i) => choice.setAttribute('aria-current', String(i === current)));
         counter.textContent = `${{current + 1}} / ${{slides.length}}`;
-        fitText();
       }}
-      function fitText() {{
-        const active = slides[current];
-        if (!active) return;
-        active.querySelectorAll('[data-fit]').forEach((element) => {{
-          const max = Number(element.dataset.maxSize || 48);
-          const min = Number(element.dataset.minSize || 14);
-          element.style.fontSize = `${{max}}px`;
-          let size = max;
-          while (size > min && (element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth)) {{
-            size -= 1;
-            element.style.fontSize = `${{size}}px`;
-          }}
-        }});
-      }}
+      controls.addEventListener('click', (event) => {{
+        if (event.target.closest('button')) return;
+        setPickerOpen(picker.hidden);
+      }});
+      document.addEventListener('click', (event) => {{
+        if (picker.hidden || picker.contains(event.target)) return;
+        if (controls.contains(event.target) && !event.target.closest('button')) return;
+        setPickerOpen(false);
+      }});
+      counter.addEventListener('keydown', (event) => {{
+        if (event.key === 'Enter' || event.key === ' ') {{
+          event.preventDefault();
+          event.stopPropagation();
+          setPickerOpen(picker.hidden);
+        }}
+      }});
       document.getElementById('previous').addEventListener('click', () => show(current - 1));
       document.getElementById('next').addEventListener('click', () => show(current + 1));
       document.addEventListener('keydown', (event) => {{
+        if (event.key === 'Escape' && !picker.hidden) {{ setPickerOpen(false); return; }}
         if (['ArrowRight', 'PageDown', ' '].includes(event.key)) {{ event.preventDefault(); show(current + 1); }}
         if (['ArrowLeft', 'PageUp'].includes(event.key)) {{ event.preventDefault(); show(current - 1); }}
         if (event.key === 'Home') show(0);
         if (event.key === 'End') show(slides.length - 1);
       }});
-      window.addEventListener('resize', fitText);
       show(0);
     }})();
   </script>

@@ -1,0 +1,34 @@
+name: Timeline
+description: Present milestones or events in chronological order.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+    example: From analysis to safer streets
+    max_chars: 81
+  - name: intro
+    label: Optional context
+    type: text
+    required: false
+    example: A phased plan makes results measurable.
+    max_chars: 210
+  - name: milestones
+    label: Milestones (include a date and description per item)
+    type: bullets
+    required: true
+    example:
+      - Jan 2026 — Map high-risk locations
+      - Feb 2026 — Review crash and near-miss data
+      - Mar 2026 — Hold neighborhood listening sessions
+      - Apr 2026 — Select pilot corridors
+      - May 2026 — Co-design quick-build pilots
+      - Jun 2026 — Install temporary safety changes
+    max_items: 12
+    max_item_chars: 144
+body: |
+  <div class="content-slide">
+    <h2>{{title}}</h2>
+    <p class="intro">{{intro}}</p>
+    <ol class="timeline-list">{{milestones}}</ol>
+  </div>

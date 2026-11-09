@@ -1,0 +1,20 @@
+name: Quote
+description: Feature a memorable quotation and attribute it to its source.
+fields:
+  - name: quote
+    label: Quotation
+    type: text
+    required: true
+    example: A street should feel safe for everyone, not only confident drivers.
+    max_chars: 330
+  - name: attribution
+    label: Attribution
+    type: text
+    required: false
+    example: Example planning principle
+    max_chars: 1200
+body: |
+  <div class="quote-slide">
+    <blockquote>“{{quote}}”</blockquote>
+    <p class="attribution">{{attribution}}</p>
+  </div>

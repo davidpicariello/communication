@@ -1,0 +1,31 @@
+name: Text and bullets
+description: A clear heading with an optional short introduction and a bullet list.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+    example: Why safer streets matter
+    max_chars: 81
+  - name: intro
+    label: Intro text
+    type: text
+    required: false
+    example: Designing for people lowers risk and improves daily life.
+    max_chars: 210
+  - name: bullets
+    label: Bullet items (separate items with \n)
+    type: bullets
+    required: true
+    example:
+      - Reduce speeds where people walk or cycle
+      - Make crossings clear and accessible
+      - Use quick-build projects to test improvements
+    max_items: 12
+    max_item_chars: 135
+body: |
+  <div class="content-slide">
+    <h2>{{title}}</h2>
+    <p class="intro">{{intro}}</p>
+    <ul class="bullet-list">{{bullets}}</ul>
+  </div>

@@ -1,0 +1,49 @@
+name: Comparison
+description: Compare two choices, states, or approaches in parallel columns.
+fields:
+  - name: title
+    label: Comparison title
+    type: heading
+    required: true
+    example: Where should we start?
+    max_chars: 81
+  - name: left_heading
+    label: First option heading
+    type: heading
+    required: true
+    example: Quick-build pilots
+    max_chars: 72
+  - name: left_bullets
+    label: First option bullets (separate items with \n)
+    type: bullets
+    required: true
+    example:
+      - Quick pilots with paint and flexible posts
+      - Learn from community feedback
+      - Adjust before permanent construction
+    max_items: 12
+    max_item_chars: 135
+  - name: right_heading
+    label: Second option heading
+    type: heading
+    required: true
+    example: Capital projects
+    max_chars: 72
+  - name: right_bullets
+    label: Second option bullets (separate items with \n)
+    type: bullets
+    required: true
+    example:
+      - Deliver permanent street redesigns
+      - Coordinate utilities and construction
+      - Plan for longer timelines and budgets
+    max_items: 12
+    max_item_chars: 135
+body: |
+  <div class="content-slide">
+    <h2>{{title}}</h2>
+    <div class="columns comparison">
+      <article class="column"><h3>{{left_heading}}</h3><ul class="bullet-list">{{left_bullets}}</ul></article>
+      <article class="column"><h3>{{right_heading}}</h3><ul class="bullet-list">{{right_bullets}}</ul></article>
+    </div>
+  </div>

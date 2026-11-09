@@ -1,0 +1,41 @@
+name: Two columns
+description: Present two complementary ideas side by side.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+    example: A two-part approach
+    max_chars: 81
+  - name: left_heading
+    label: Left column heading
+    type: heading
+    required: true
+    example: Fix today's risks
+    max_chars: 72
+  - name: left_content
+    label: Left column content
+    type: text
+    required: true
+    example: Add daylighting, clearer crossings, and temporary curb extensions at high-risk intersections.
+    max_chars: 600
+  - name: right_heading
+    label: Right column heading
+    type: heading
+    required: true
+    example: Build long-term change
+    max_chars: 72
+  - name: right_content
+    label: Right column content
+    type: text
+    required: true
+    example: Connect protected routes and redesign streets around safer speeds.
+    max_chars: 600
+body: |
+  <div class="content-slide">
+    <h2>{{title}}</h2>
+    <div class="columns">
+      <article class="column"><h3>{{left_heading}}</h3><p>{{left_content}}</p></article>
+      <article class="column"><h3>{{right_heading}}</h3><p>{{right_content}}</p></article>
+    </div>
+  </div>

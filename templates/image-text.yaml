@@ -1,0 +1,35 @@
+name: Image with text
+description: Pair a locally stored image with a heading and supporting text.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+    example: Make crossings easier to see
+    max_chars: 81
+  - name: image
+    label: Local image path
+    type: image
+    required: true
+    example: assets/safer-crossing.svg
+    max_chars: 720
+  - name: alt
+    label: Image description for accessibility
+    type: text
+    required: true
+    example: Illustration of a marked crossing with a pedestrian and curb extensions
+    max_chars: 360
+  - name: content
+    label: Supporting content
+    type: text
+    required: true
+    example: Clear crossings and shorter crossing distances help people feel safer.
+    max_chars: 1500
+body: |
+  <div class="content-slide">
+    <h2>{{title}}</h2>
+    <div class="image-text">
+      <img src="{{image}}" alt="{{alt}}">
+      <p>{{content}}</p>
+    </div>
+  </div>
