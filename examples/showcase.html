@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example Presentation</title>
+  <style>
+    :root { --ratio: 16 / 9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #18202e; background: #101522; font-family: system-ui, sans-serif; }
+    .slide { width: min(96vw, 170vh); aspect-ratio: 16 / 9; margin: 2vh auto; padding: 8%; display: flex; flex-direction: column; justify-content: center; background: #f4f6fa; }
+    h1 { font-size: clamp(38px, 7vw, 76px); margin: 0 0 .25em; }
+    h2 { font-size: clamp(28px, 4vw, 48px); }
+    h3 { font-size: clamp(20px, 3vw, 30px); }
+    p, li { font-size: clamp(18px, 2.2vw, 27px); line-height: 1.45; }
+    .muted { color: #657187; }
+    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 5%; }
+    .columns article { padding: 5%; background: white; border: 1px solid #dce2ed; border-radius: 14px; }
+    .accent { color: #4a62d8; }
+  </style>
+</head>
+<body>
+  <section class="slide"><p class="accent">EXAMPLE PRESENTATION</p><h1>Ideas into action</h1><p class="muted">A tiny showcase of the included slide layouts</p></section>
+  <section class="slide"><p class="accent">01 / CONTEXT</p><h2>Start with the essential message</h2><ul><li>Keep one main idea per slide</li><li>Use short, scannable supporting points</li><li>Let layout create visual hierarchy</li></ul></section>
+  <section class="slide"><h2>Two complementary perspectives</h2><div class="columns"><article><h3>What we know</h3><p>Clear structure helps an audience follow the story.</p></article><article><h3>What comes next</h3><p>Thoughtful design makes the message memorable.</p></article></div></section>
+  <section class="slide"><p class="accent">A USEFUL REMINDER</p><h1>“Simplicity boils down to two steps: identify the essential. Eliminate the rest.”</h1><p class="muted">— Leo Babauta</p></section>
+</body>
+</html>

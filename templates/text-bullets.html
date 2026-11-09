@@ -1,0 +1,22 @@
+<!--
+name: Text and bullets
+description: A clear heading with an optional short introduction and a bullet list.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+  - name: intro
+    label: Intro text
+    type: text
+    required: false
+  - name: bullets
+    label: Bullet items (separate items with \n)
+    type: bullets
+    required: true
+-->
+<div class="content-slide">
+  <h2 data-fit>{{title}}</h2>
+  <p class="intro" data-fit>{{intro}}</p>
+  <ul class="bullet-list" data-fit>{{bullets}}</ul>
+</div>

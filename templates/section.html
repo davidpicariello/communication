@@ -1,0 +1,18 @@
+<!--
+name: Section divider
+description: Mark a transition to a new topic or chapter.
+fields:
+  - name: title
+    label: Section title
+    type: heading
+    required: true
+  - name: subtitle
+    label: Short supporting line
+    type: text
+    required: false
+-->
+<div class="section-slide">
+  <p class="eyebrow">Next section</p>
+  <h1 data-fit data-max-size="64">{{title}}</h1>
+  <p class="subtitle" data-fit>{{subtitle}}</p>
+</div>

@@ -1,0 +1,32 @@
+<!--
+name: Comparison
+description: Compare two choices, states, or approaches in parallel columns.
+fields:
+  - name: title
+    label: Comparison title
+    type: heading
+    required: true
+  - name: left_heading
+    label: First option heading
+    type: heading
+    required: true
+  - name: left_bullets
+    label: First option bullets (separate items with \n)
+    type: bullets
+    required: true
+  - name: right_heading
+    label: Second option heading
+    type: heading
+    required: true
+  - name: right_bullets
+    label: Second option bullets (separate items with \n)
+    type: bullets
+    required: true
+-->
+<div class="content-slide">
+  <h2 data-fit>{{title}}</h2>
+  <div class="columns comparison">
+    <article class="column"><h3 data-fit>{{left_heading}}</h3><ul class="bullet-list" data-fit>{{left_bullets}}</ul></article>
+    <article class="column"><h3 data-fit>{{right_heading}}</h3><ul class="bullet-list" data-fit>{{right_bullets}}</ul></article>
+  </div>
+</div>

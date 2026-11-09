@@ -1,0 +1,22 @@
+<!--
+name: Title slide
+description: Introduce the presentation with a title, subtitle, and optional presenter.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+  - name: subtitle
+    label: Subtitle
+    type: text
+    required: false
+  - name: presenter
+    label: Presenter or organization
+    type: text
+    required: false
+-->
+<div class="title-slide">
+  <p class="eyebrow">{{presenter}}</p>
+  <h1 data-fit data-max-size="72">{{title}}</h1>
+  <p class="subtitle" data-fit>{{subtitle}}</p>
+</div>

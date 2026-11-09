@@ -1,0 +1,32 @@
+<!--
+name: Two columns
+description: Present two complementary ideas side by side.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+  - name: left_heading
+    label: Left column heading
+    type: heading
+    required: true
+  - name: left_content
+    label: Left column content
+    type: text
+    required: true
+  - name: right_heading
+    label: Right column heading
+    type: heading
+    required: true
+  - name: right_content
+    label: Right column content
+    type: text
+    required: true
+-->
+<div class="content-slide">
+  <h2 data-fit>{{title}}</h2>
+  <div class="columns">
+    <article class="column"><h3 data-fit>{{left_heading}}</h3><p data-fit>{{left_content}}</p></article>
+    <article class="column"><h3 data-fit>{{right_heading}}</h3><p data-fit>{{right_content}}</p></article>
+  </div>
+</div>
