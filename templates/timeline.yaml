@@ -26,9 +26,16 @@ fields:
       - Jun 2026 — Install temporary safety changes
     max_items: 12
     max_item_chars: 144
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="content-slide">
     <h2>{{title}}</h2>
     <p class="intro">{{intro}}</p>
     <ol class="timeline-list">{{milestones}}</ol>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

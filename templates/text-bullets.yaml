@@ -23,9 +23,16 @@ fields:
       - Use quick-build projects to test improvements
     max_items: 12
     max_item_chars: 135
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="content-slide">
     <h2>{{title}}</h2>
     <p class="intro">{{intro}}</p>
     <ul class="bullet-list">{{bullets}}</ul>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

@@ -26,6 +26,8 @@ body {
   background: var(--background);
 }
 .slide.active { display: flex; flex-direction: column; }
+.slide-footer { position: absolute; bottom: 3%; left: 8%; right: 8%; color: var(--muted); font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.slide-footer:empty { display: none; }
 h1, h2, h3, p, blockquote { margin-top: 0; }
 h1, h2, h3 { line-height: 1.08; letter-spacing: -0.035em; }
 h1 { max-width: 90%; font-size: 72px; }

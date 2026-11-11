@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Stop sign</title>
+  <desc id="description">A red octagonal stop sign with a white border and white STOP lettering on a transparent background.</desc>
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d6222b"/>
+      <stop offset="1" stop-color="#b20e19"/>
+    </linearGradient>
+  </defs>
+  <path d="M156 14H356L498 156V356L356 498H156L14 356V156Z" fill="#b9bdc1" stroke="#737980" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M160 25H352L487 160V352L352 487H160L25 352V160Z" fill="#fff"/>
+  <path d="M165 38H347L474 165V347L347 474H165L38 347V165Z" fill="url(#red)"/>
+  <g fill="#d1d3d5" stroke="#787e83" stroke-width="2">
+    <circle cx="256" cy="57" r="5"/>
+    <circle cx="256" cy="455" r="5"/>
+  </g>
+  <!-- Outlined lettering keeps the sign independent of installed fonts. -->
+  <g transform="translate(68 181)" fill="#fff" fill-rule="evenodd">
+    <path d="M69 0H21C7 0 0 10 0 25V54C0 68 8 76 22 76H47V121H0V150H51C68 150 77 141 77 125V72C77 57 69 49 54 49H30V28H69Z"/>
+    <path d="M90 0H167V29H143V150H114V29H90Z"/>
+    <path d="M203 0H232C249 0 258 10 258 27V123C258 140 249 150 232 150H203C186 150 177 140 177 123V27C177 10 186 0 203 0ZM207 29V121H228V29Z"/>
+    <path d="M275 0H326C344 0 354 10 354 28V68C354 86 344 96 326 96H305V150H275ZM305 29V67H324V29Z"/>
+  </g>
+</svg>

@@ -23,9 +23,16 @@ fields:
       - Measure what changes
     max_items: 10
     max_item_chars: 120
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="content-slide">
     <h2>{{title}}</h2>
     <p class="intro">{{intro}}</p>
     <ol class="agenda-list">{{sections}}</ol>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

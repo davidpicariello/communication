@@ -1,4 +1,3 @@
-import importlib.util
 import json
 import runpy
 import tempfile
@@ -6,11 +5,10 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from scripts import create as builder
+from scripts.field_types import FieldType, register_field_type
+
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("presentation_builder", ROOT / "scripts" / "create.py")
-assert SPEC and SPEC.loader
-builder = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(builder)
 
 
 class BuilderTests(unittest.TestCase):
@@ -89,6 +87,11 @@ class BuilderTests(unittest.TestCase):
             ("- not a template", "template must be a mapping"),
             ("name: Example\ndescription: Example\nfields: []", "'body'"),
             ("name: Example\ndescription: Example\nbody: <div></div>\nfields: {}", "'fields'"),
+            (
+                'name: Example\ndescription: Example\nbody: <div></div>\n'
+                'fields: [{name: title, type: unknown}]',
+                "Unsupported field type 'unknown'",
+            ),
             (
                 'name: Example\ndescription: Example\nbody: <div></div>\n'
                 'fields: [{name: title, required: "false"}]',
@@ -194,7 +197,24 @@ class BuilderTests(unittest.TestCase):
         self.assertIn('<script type="application/json" id="presentation-source">', deck)
         self.assertNotIn("</script><img", deck)
         embedded = deck.split('<script type="application/json" id="presentation-source">', 1)[1].split("</script>", 1)[0]
-        self.assertEqual(json.loads(embedded), source)
+        self.assertEqual(json.loads(embedded), builder.validate_source(source))
+
+    def test_all_templates_support_optional_escaped_footers(self):
+        examples = runpy.run_path(str(ROOT / "scripts" / "build_examples.py"), run_name="build_examples_test")
+        for template in builder.templates():
+            with self.subTest(template=template["id"]):
+                footer = next(field for field in template["fields"] if field["name"] == "footer")
+                self.assertIs(footer["required"], False)
+                self.assertEqual(footer["example"], "Department of Public Safety and Awareness and Concern")
+                source = examples["source_for_template"](template, "light", "widescreen")
+                values = source["slides"][0]["values"]
+                values["footer"] = "Public <Safety> & Awareness"
+                self.assertIn(
+                    '<footer class="slide-footer">Public &lt;Safety&gt; &amp; Awareness</footer>',
+                    builder.render_source(source),
+                )
+                del values["footer"]
+                self.assertIn('<footer class="slide-footer"></footer>', builder.render_source(source))
 
     def test_validation_rejects_unknown_fields_and_invalid_bullets(self):
         source = self.example_source()
@@ -205,6 +225,56 @@ class BuilderTests(unittest.TestCase):
         source["slides"][1]["values"]["left_bullets"] = "not an array"
         with self.assertRaisesRegex(ValueError, "array of strings"):
             builder.validate_source(source)
+
+    def test_custom_field_type_can_be_registered_and_used(self):
+        class LabelFieldType(FieldType):
+            def validate(self, value, field, *, location):
+                if not isinstance(value, dict) or not isinstance(value.get("label"), str):
+                    raise ValueError(f"{location} must be an object with a string label")
+                return value
+
+            def render(self, value, field):
+                return f'<strong>{builder.esc(value["label"])}</strong>'
+
+        register_field_type("test-label", LabelFieldType())
+        template = {
+            "id": "custom",
+            "fields": [{"name": "badge", "type": "test-label", "required": True}],
+            "body": "<div>{{badge}}</div>",
+        }
+        source = {
+            "title": "Custom field",
+            "theme": "light",
+            "size": "widescreen",
+            "slides": [{"layout": "custom", "values": {"badge": {"label": "A & B"}}}],
+        }
+
+        with mock.patch.object(builder, "templates", return_value=[template]):
+            normalized = builder.validate_source(source)
+            deck = builder.render_source(source)
+
+        self.assertEqual(normalized["slides"][0]["values"]["badge"], {"label": "A & B"})
+        self.assertIn("<strong>A &amp; B</strong>", deck)
+
+    def test_omitted_optional_bullets_use_an_empty_list(self):
+        template = {
+            "id": "custom",
+            "fields": [{"name": "points", "type": "bullets", "required": False}],
+            "body": "<ul>{{points}}</ul>",
+        }
+        source = {
+            "title": "Optional bullets",
+            "theme": "light",
+            "size": "widescreen",
+            "slides": [{"layout": "custom", "values": {}}],
+        }
+
+        with mock.patch.object(builder, "templates", return_value=[template]):
+            normalized = builder.validate_source(source)
+            deck = builder.render_source(source)
+
+        self.assertEqual(normalized["slides"][0]["values"]["points"], [])
+        self.assertIn("<ul></ul>", deck)
 
     def test_rendering_hard_fails_when_template_limits_are_exceeded(self):
         source = self.example_source()
@@ -271,7 +341,7 @@ class BuilderTests(unittest.TestCase):
             namespace = runpy.run_path(str(ROOT / "scripts" / "extract_source.py"), run_name="extract_source_test")
             extracted_path = namespace["extract_source"](html_path, root / "sources")
             self.assertRegex(extracted_path.name, r"^presentation-source-[0-9a-f]{12}\.json$")
-            self.assertEqual(json.loads(extracted_path.read_text(encoding="utf-8")), source)
+            self.assertEqual(json.loads(extracted_path.read_text(encoding="utf-8")), builder.validate_source(source))
 
     def test_extract_source_errors_when_embedded_source_is_missing(self):
         with tempfile.TemporaryDirectory() as directory:

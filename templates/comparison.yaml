@@ -39,6 +39,12 @@ fields:
       - Plan for longer timelines and budgets
     max_items: 12
     max_item_chars: 135
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="content-slide">
     <h2>{{title}}</h2>
@@ -47,3 +53,4 @@ body: |
       <article class="column"><h3>{{right_heading}}</h3><ul class="bullet-list">{{right_bullets}}</ul></article>
     </div>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

@@ -5,26 +5,32 @@ fields:
     label: Slide title
     type: heading
     required: true
-    example: Make crossings easier to see
+    example: Make stop signs clear and visible
     max_chars: 81
   - name: image
     label: Local image path
     type: image
     required: true
-    example: assets/safer-crossing.svg
+    example: assets/stop-sign.svg
     max_chars: 720
   - name: alt
     label: Image description for accessibility
     type: text
     required: true
-    example: Illustration of a marked crossing with a pedestrian and curb extensions
+    example: Red octagonal STOP sign with a white border and white lettering
     max_chars: 360
   - name: content
     label: Supporting content
     type: text
     required: true
-    example: Clear crossings and shorter crossing distances help people feel safer.
+    example: Clearly posted, visible stop signs give drivers an unmistakable cue to stop and make intersections more predictable for everyone.
     max_chars: 1500
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="content-slide">
     <h2>{{title}}</h2>
@@ -33,3 +39,4 @@ body: |
       <p>{{content}}</p>
     </div>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

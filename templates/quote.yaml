@@ -13,8 +13,15 @@ fields:
     required: false
     example: Example planning principle
     max_chars: 1200
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="quote-slide">
     <blockquote>“{{quote}}”</blockquote>
     <p class="attribution">{{attribution}}</p>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

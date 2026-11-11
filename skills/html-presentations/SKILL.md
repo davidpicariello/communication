@@ -59,13 +59,27 @@ Example source:
 ## Presentation controls and styling
 
 - Use the left/right arrow keys, Page Up/Page Down, or the on-screen buttons to navigate. Home and End go to the first and last slides.
-- Choose a theme (`light` or `dark`) independently from a slide size (`widescreen` 16:9 or `standard` 4:3).
-- Use local image assets and system fonts; avoid external network dependencies.
+- Inspect the CSS files in `styles/themes/` and `styles/sizes/`. Use each filename (without `.css`) to determine the available theme and size values, and review the stylesheets to choose options that fit the presentation.
+- Use local image assets and system fonts; avoid external network dependencies to keep the file portable.
 
 ## Extend the project
 
-- Add a slide layout as one `.yaml` file in `templates/`. Use the structure of the existing templates: `name`, `description`, a `fields` list, and a multiline HTML `body: |` block. Each field specifies `name`, `label`, `type`, a boolean `required`, an `example` value, and a hard limit: `max_chars` for string fields or `max_items` and `max_item_chars` for bullet fields. Bullet examples are native YAML lists of strings. Use `{{field_name}}` placeholders in the HTML body. Templates are data loaded with `yaml.safe_load()`, not executable Python.
-- Supported field types are `heading`, `text`, `bullets`, and `image`. Escape content for HTML and validate assets when adding new field behavior.
-- Add theme stylesheets under `styles/themes/` and size stylesheets under `styles/sizes/`; keep shared layout rules in `styles/base.css`.
-- Run `python3 scripts/gallery.py` to refresh the layout gallery.
-- Run `python3 scripts/build_examples.py` to clear `examples/` except for `index.html`, then generate one example presentation per template and each size/theme combination in `examples/<size>-<theme>/` subfolders. Each subfolder's `index.html` previews the decks in scaled iframes whose viewport ratio is read from the size stylesheet. The script discovers available sizes and themes from their CSS files.
+### Add a slide layout
+
+- Add one `.yaml` file to `templates/`. Its filename without the `.yaml` extension is the layout ID used in presentation JSON.
+- Follow an existing template's structure: `name`, `description`, a `fields` list, and a multiline HTML `body: |` block. Fields specify `name`, `label`, `type`, a boolean `required`, and an `example` value. String fields use `max_chars`; bullet fields use `max_items` and `max_item_chars`. Bullet examples are native YAML lists of strings.
+- Supported field types are `heading`, `text`, `bullets`, and `image`. Use `{{field_name}}` placeholders in the body. The builder escapes text and bullet values and embeds image files; keep template markup static rather than expecting user-provided HTML to be interpreted.
+- Templates are YAML data loaded with `yaml.safe_load()`, not executable Python.
+- To add a field type, subclass `FieldType` in its own module under `scripts/field_types/`, then import it and register an instance in `scripts/field_types/__init__.py` with `register_field_type()`. Keep its value validation, optional-field default, and rendering together in the handler; add tests for the new behavior. Update example handling as needed in `scripts/gallery.py` and `scripts/build_examples.py`.
+- Preserve HTML escaping and validate image or other asset paths when adding or changing field handling.
+
+### Add a theme or slide size
+
+- Add a stylesheet under `styles/themes/` or `styles/sizes/`, respectively. The stylesheet filename stem becomes the theme or size value accepted in presentation JSON; keep shared layout rules in `styles/base.css`.
+- Size stylesheets must define `--ratio: width / height`, which the example builder uses for preview sizing.
+
+### Preview and verify changes
+
+- Run `python3 scripts/gallery.py` to refresh `examples/index.html`, the layout gallery.
+- Run `python3 scripts/build_examples.py` to generate example decks for every template and size/theme combination. **This clears `examples/` except for `index.html` before generating output.** It writes variant folders under `examples/<size>-<theme>/`; each contains an index page with scaled previews. Available sizes and themes are discovered from their stylesheet filenames.
+- Generate a presentation with `scripts/create.py` and inspect it in a browser, including the relevant theme and size variants. Check required fields, field limits, image embedding, and whether content fits without triggering the runtime overflow error.

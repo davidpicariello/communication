@@ -33,6 +33,8 @@ body {
   background: var(--background);
 }
 .slide.active { display: flex; flex-direction: column; }
+.slide-footer { position: absolute; bottom: 3%; left: 8%; right: 8%; color: var(--muted); font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.slide-footer:empty { display: none; }
 h1, h2, h3, p, blockquote { margin-top: 0; }
 h1, h2, h3 { line-height: 1.08; letter-spacing: -0.035em; }
 h1 { max-width: 90%; font-size: 72px; }
@@ -95,9 +97,10 @@ body[data-theme="dark"] { --background: #151a27; --foreground: #f1f4fb; --muted:
   <blockquote>“A street should feel safe for everyone, not only confident drivers.”</blockquote>
   <p class="attribution">Example planning principle</p>
 </div>
+<footer class="slide-footer">Department of Public Safety and Awareness and Concern</footer>
 </section>
   </main>
-    <script type="application/json" id="presentation-source">{"title": "Quote example", "theme": "dark", "size": "widescreen", "slides": [{"layout": "quote", "values": {"quote": "A street should feel safe for everyone, not only confident drivers.", "attribution": "Example planning principle"}}]}</script>
+    <script type="application/json" id="presentation-source">{"title": "Quote example", "theme": "dark", "size": "widescreen", "slides": [{"layout": "quote", "values": {"quote": "A street should feel safe for everyone, not only confident drivers.", "attribution": "Example planning principle", "footer": "Department of Public Safety and Awareness and Concern"}}]}</script>
   <nav class="controls" aria-label="Presentation controls">
     <button type="button" id="previous" aria-label="Previous slide">←</button>
     <span id="counter" role="button" tabindex="0" aria-label="Choose a slide" aria-haspopup="true" aria-expanded="false" aria-controls="slide-picker" aria-live="polite"></span>

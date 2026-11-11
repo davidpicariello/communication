@@ -4,14 +4,17 @@ A Python tool for creating self-contained HTML slide decks from JSON source file
 
 ## Quick start
 
+### Step python
+
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements.txt
-python3 scripts/create.py presentation.json
 ```
 
-Create a temporary JSON source file containing a title, optional theme and size, and slides identified by layout name and field values. The generated HTML embeds the source JSON in a non-executable `application/json` script element, safely escaping `<` characters so decks can be edited and regenerated later. Keep the JSON source while you're editing and regenerating the deck. Delete the temporary JSON after editing is complete and you've confirmed the HTML; the embedded source can be recovered later with `scripts/extract_source.py` if you need to revise the deck again.
+### Create presentation
+
+Create a JSON source file containing a title, optional theme and size, and slides identified by layout name and field values.
 
 ```json
 {
@@ -32,6 +35,10 @@ Create a temporary JSON source file containing a title, optional theme and size,
 ```
 
 Generate the deck with `python3 scripts/create.py presentation.json -o presentation.html`. Layout names and fields are listed in `examples/index.html`. Bullet fields take arrays of strings; image fields take local image paths, which are embedded into the finished deck.
+
+### Making edits
+
+The generated HTML embeds the source JSON in a non-executable `application/json` script element so decks can be edited and regenerated later. Keep the JSON source while you're editing and regenerating the deck. Delete the temporary JSON after editing is complete and you've confirmed the HTML; the embedded source can be recovered later with `scripts/extract_source.py` if you need to revise the deck again.
 
 Template field limits are hard validation checks: the builder rejects strings over `max_chars`, or bullet lists over `max_items` / `max_item_chars`. At runtime, the deck also stops with a visible error if content still overflows after shrinking to its minimum font size. The layout gallery shows each field's limits.
 
@@ -66,6 +73,7 @@ The generated decks are saved in `examples/<size>-<theme>/` folders. The script 
 - `assets/` — source images used by template examples.
 - `styles/` — shared CSS, themes, and slide sizes.
 - `scripts/create.py` — JSON-driven deck generator.
+- `scripts/field_types/` — validation and rendering handlers for each field type.
 - `scripts/extract_source.py` — extracts embedded source JSON to a random filename for editing.
 - `scripts/gallery.py` — offline template gallery generator.
 - `scripts/build_examples.py` — builds one example deck for each template.

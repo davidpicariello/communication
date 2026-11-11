@@ -31,6 +31,12 @@ fields:
     required: true
     example: Connect protected routes and redesign streets around safer speeds.
     max_chars: 600
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="content-slide">
     <h2>{{title}}</h2>
@@ -39,3 +45,4 @@ body: |
       <article class="column"><h3>{{right_heading}}</h3><p>{{right_content}}</p></article>
     </div>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

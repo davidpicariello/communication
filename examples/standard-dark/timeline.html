@@ -33,6 +33,8 @@ body {
   background: var(--background);
 }
 .slide.active { display: flex; flex-direction: column; }
+.slide-footer { position: absolute; bottom: 3%; left: 8%; right: 8%; color: var(--muted); font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.slide-footer:empty { display: none; }
 h1, h2, h3, p, blockquote { margin-top: 0; }
 h1, h2, h3 { line-height: 1.08; letter-spacing: -0.035em; }
 h1 { max-width: 90%; font-size: 72px; }
@@ -101,9 +103,10 @@ body[data-theme="dark"] { --background: #151a27; --foreground: #f1f4fb; --muted:
 <li>May 2026 — Co-design quick-build pilots</li>
 <li>Jun 2026 — Install temporary safety changes</li></ol>
 </div>
+<footer class="slide-footer">Department of Public Safety and Awareness and Concern</footer>
 </section>
   </main>
-    <script type="application/json" id="presentation-source">{"title": "Timeline example", "theme": "dark", "size": "standard", "slides": [{"layout": "timeline", "values": {"title": "From analysis to safer streets", "intro": "A phased plan makes results measurable.", "milestones": ["Jan 2026 — Map high-risk locations", "Feb 2026 — Review crash and near-miss data", "Mar 2026 — Hold neighborhood listening sessions", "Apr 2026 — Select pilot corridors", "May 2026 — Co-design quick-build pilots", "Jun 2026 — Install temporary safety changes"]}}]}</script>
+    <script type="application/json" id="presentation-source">{"title": "Timeline example", "theme": "dark", "size": "standard", "slides": [{"layout": "timeline", "values": {"title": "From analysis to safer streets", "intro": "A phased plan makes results measurable.", "milestones": ["Jan 2026 — Map high-risk locations", "Feb 2026 — Review crash and near-miss data", "Mar 2026 — Hold neighborhood listening sessions", "Apr 2026 — Select pilot corridors", "May 2026 — Co-design quick-build pilots", "Jun 2026 — Install temporary safety changes"], "footer": "Department of Public Safety and Awareness and Concern"}}]}</script>
   <nav class="controls" aria-label="Presentation controls">
     <button type="button" id="previous" aria-label="Previous slide">←</button>
     <span id="counter" role="button" tabindex="0" aria-label="Choose a slide" aria-haspopup="true" aria-expanded="false" aria-controls="slide-picker" aria-live="polite"></span>

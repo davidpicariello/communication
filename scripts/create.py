@@ -3,15 +3,20 @@
 
 from __future__ import annotations
 
-import base64
-import html
 import argparse
 import json
-import mimetypes
 import sys
 from pathlib import Path
 
 import yaml
+
+if __package__:
+    from .field_types import esc, get_field_type
+else:  # Support direct execution and loading this file by path.
+    SCRIPT_DIR = str(Path(__file__).resolve().parent)
+    if SCRIPT_DIR not in sys.path:
+        sys.path.insert(0, SCRIPT_DIR)
+    from field_types import esc, get_field_type
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = ROOT / "templates"
@@ -39,6 +44,13 @@ def read_template(path: Path) -> dict:
             raise ValueError(f"{path.name}: each field requires a non-empty string 'name'")
         if not isinstance(field.get("required", True), bool):
             raise ValueError(f"{path.name}: field '{field['name']}' requires a boolean 'required'")
+        field_type = field.get("type", "text")
+        if not isinstance(field_type, str):
+            raise ValueError(f"{path.name}: field '{field['name']}' requires a string 'type'")
+        try:
+            get_field_type(field_type)
+        except ValueError as error:
+            raise ValueError(f"{path.name}: field '{field['name']}': {error}") from error
     metadata["body"] = metadata["body"].strip()
     metadata["id"] = path.stem
     return metadata
@@ -53,31 +65,8 @@ def templates() -> list[dict]:
     return sorted(result, key=lambda item: rank.get(str(item["id"]), len(rank)))
 
 
-def esc(value: object) -> str:
-    return html.escape(str(value), quote=True)
-
-
-def image_data_uri(value: str) -> str:
-    path = Path(value).expanduser()
-    if not path.is_absolute():
-        path = Path.cwd() / path
-    if not path.is_file():
-        raise ValueError(f"Image file not found: {value}")
-    mime, _ = mimetypes.guess_type(path.name)
-    if not mime or not mime.startswith("image/"):
-        raise ValueError(f"Not a recognized image file: {value}")
-    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-    return f"data:{mime};base64,{encoded}"
-
-
-def render_field(field_type: str, value: object) -> str:
-    if field_type == "image":
-        return image_data_uri(str(value)) if value else ""
-    if field_type == "bullets":
-        items = value if isinstance(value, list) else []
-        return "\n".join(f"<li>{esc(item)}</li>" for item in items)
-    text = esc(value).replace("\n", "<br>" if field_type == "text" else "\n")
-    return text
+def render_field(field_type: str, value: object, field: dict) -> str:
+    return get_field_type(field_type).render(value, field)
 
 
 def render_slide(template: dict, values: dict[str, object]) -> str:
@@ -88,23 +77,10 @@ def render_slide(template: dict, values: dict[str, object]) -> str:
         assert isinstance(field, dict)
         name = str(field["name"])
         token = "{{" + name + "}}"
-        replacement = render_field(str(field.get("type", "text")), values.get(name, ""))
+        field_type = str(field.get("type", "text"))
+        replacement = render_field(field_type, values.get(name, ""), field)
         body = body.replace(token, replacement)
     return f'<section class="slide layout-{esc(template["id"])}">\n{body}\n</section>'
-
-
-def field_limit(field: dict, key: str) -> int | None:
-    """Read and validate a numeric field limit from template metadata."""
-    raw_limit = field.get(key)
-    if raw_limit is None:
-        return None
-    try:
-        limit = int(raw_limit)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"Template field '{field.get('name')}' has an invalid {key} limit") from error
-    if limit < 0:
-        raise ValueError(f"Template field '{field.get('name')}' has a negative {key} limit")
-    return limit
 
 
 def validate_source(source: object) -> dict:
@@ -147,36 +123,14 @@ def validate_source(source: object) -> dict:
             raise ValueError(f"Slide {index} ({layout}) has unknown field(s): {names}")
         normalized: dict[str, object] = {}
         for name, field in known_fields.items():
-            value = values.get(name, "")
+            field_type = str(field.get("type", "text"))
+            handler = get_field_type(field_type)
+            value = values.get(name, handler.empty_value())
             required = field.get("required", True)
-            if required and (value is None or value == "" or value == []):
+            if required and handler.is_empty(value):
                 raise ValueError(f"Slide {index} ({layout}) requires '{name}'")
-            field_type = field.get("type", "text")
-            if field_type == "bullets":
-                if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
-                    raise ValueError(f"Slide {index} field '{name}' must be an array of strings")
-                max_items = field_limit(field, "max_items")
-                if max_items is not None and len(value) > max_items:
-                    raise ValueError(
-                        f"Slide {index} ({layout}) field '{name}' has {len(value)} items; maximum is {max_items}"
-                    )
-                max_item_chars = field_limit(field, "max_item_chars")
-                if max_item_chars is not None:
-                    for item_index, item in enumerate(value, start=1):
-                        if len(item) > max_item_chars:
-                            raise ValueError(
-                                f"Slide {index} ({layout}) field '{name}' item {item_index} has {len(item)} characters; "
-                                f"maximum is {max_item_chars}"
-                            )
-            elif not isinstance(value, str):
-                raise ValueError(f"Slide {index} field '{name}' must be a string")
-            else:
-                max_chars = field_limit(field, "max_chars")
-                if max_chars is not None and len(value) > max_chars:
-                    raise ValueError(
-                        f"Slide {index} ({layout}) field '{name}' has {len(value)} characters; maximum is {max_chars}"
-                    )
-            normalized[name] = value
+            location = f"Slide {index} ({layout}) field '{name}'"
+            normalized[name] = handler.validate(value, field, location=location)
         slides.append({"layout": layout, "values": normalized})
     return {"title": title, "theme": theme, "size": size, "slides": slides}
 

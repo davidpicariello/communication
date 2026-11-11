@@ -19,9 +19,16 @@ fields:
     required: false
     example: Illustrative target
     max_chars: 900
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="statistic-slide">
     <p class="statistic-value">{{value}}</p>
     <p class="statistic-description">{{description}}</p>
     <p class="attribution">{{source}}</p>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>

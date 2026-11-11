@@ -19,9 +19,16 @@ fields:
     required: false
     example: City Mobility Team
     max_chars: 120
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
 body: |
   <div class="title-slide">
     <p class="eyebrow">{{presenter}}</p>
     <h1>{{title}}</h1>
     <p class="subtitle">{{subtitle}}</p>
   </div>
+  <footer class="slide-footer">{{footer}}</footer>
