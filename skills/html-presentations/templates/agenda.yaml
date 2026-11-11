@@ -1,0 +1,38 @@
+name: Agenda / roadmap
+description: Preview the sections or topics covered in the presentation.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+    example: Today's route to safer streets
+    max_chars: 81
+  - name: intro
+    label: Optional context
+    type: text
+    required: false
+    example: We'll move from evidence to action.
+    max_chars: 210
+  - name: sections
+    label: Agenda items (one per bullet)
+    type: bullets
+    required: true
+    example:
+      - Understand the risk
+      - Choose practical interventions
+      - Measure what changes
+    max_items: 10
+    max_item_chars: 120
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
+body: |
+  <div class="content-slide">
+    <h2>{{title}}</h2>
+    <p class="intro">{{intro}}</p>
+    <ol class="agenda-list">{{sections}}</ol>
+  </div>
+  <footer class="slide-footer">{{footer}}</footer>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Widescreen / Dark Examples</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; padding:36px; color:#18202e; background:#edf0f6; font-family:system-ui,sans-serif; overflow:auto; }
+    main { width:max-content; }
+    h1 { margin:0 0 8px; font-size:36px; }
+    .intro { margin:0 0 24px; color:#657187; }
+    .grid { display:flex; flex-flow:row wrap; gap:24px; max-width:calc(100vw - 72px); }
+    .card { width:600px; padding:24px; border-radius:16px; background:#fff; box-shadow:0 8px 30px #17203312; }
+    .card h2 { margin:0 0 8px; font-size:24px; }
+    .card header p { min-height:2.8em; margin:0; color:#657187; }
+    .preview { position:relative; width:552px; margin:18px 0; overflow:hidden; outline:1px solid #dce2ed; background:#101522; }
+    .preview iframe { position:absolute; top:0; left:0; display:block; border:0; transform-origin:top left; }
+    a { color:#4a62d8; font-weight:650; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Widescreen · Dark</h1>
+    <p class="intro">Slide previews use a 1280px iframe viewport with the aspect ratio from <code>styles/sizes/widescreen.css</code>.</p>
+    <div class="grid"><article class="card">
+  <header><h2>Title slide</h2><p>Introduce the presentation with a title, subtitle, and optional presenter.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="title.html" title="Title slide example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="title.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Agenda / roadmap</h2><p>Preview the sections or topics covered in the presentation.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="agenda.html" title="Agenda / roadmap example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="agenda.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Section divider</h2><p>Mark a transition to a new topic or chapter.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="section.html" title="Section divider example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="section.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Text and bullets</h2><p>A clear heading with an optional short introduction and a bullet list.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="text-bullets.html" title="Text and bullets example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="text-bullets.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Two columns</h2><p>Present two complementary ideas side by side.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="two-column.html" title="Two columns example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="two-column.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Comparison</h2><p>Compare two choices, states, or approaches in parallel columns.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="comparison.html" title="Comparison example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="comparison.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Timeline</h2><p>Present milestones or events in chronological order.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="timeline.html" title="Timeline example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="timeline.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Image with text</h2><p>Pair a locally stored image with a heading and supporting text.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="image-text.html" title="Image with text example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="image-text.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Quote</h2><p>Feature a memorable quotation and attribute it to its source.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="quote.html" title="Quote example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="quote.html">Open full-size example</a>
+</article><article class="card">
+  <header><h2>Key statistic</h2><p>Make one important number or short phrase the visual focus.</p></header>
+  <div class="preview" style="height:310px">
+    <iframe src="statistic.html" title="Key statistic example" width="1280" height="720" loading="lazy" style="width:1280px;height:720px;transform:scale(0.431250)"></iframe>
+  </div>
+  <a href="statistic.html">Open full-size example</a>
+</article></div>
+  </main>
+</body>
+</html>

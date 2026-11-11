@@ -1,0 +1,28 @@
+name: Section divider
+description: Mark a transition to a new topic or chapter.
+fields:
+  - name: title
+    label: Section title
+    type: heading
+    required: true
+    example: Start with the highest-risk streets
+    max_chars: 108
+  - name: subtitle
+    label: Short supporting line
+    type: text
+    required: false
+    example: Use evidence to prioritize quick wins
+    max_chars: 900
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
+body: |
+  <div class="section-slide">
+    <p class="eyebrow">Next section</p>
+    <h1>{{title}}</h1>
+    <p class="subtitle">{{subtitle}}</p>
+  </div>
+  <footer class="slide-footer">{{footer}}</footer>

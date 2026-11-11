@@ -1,0 +1,42 @@
+name: Image with text
+description: Pair a locally stored image with a heading and supporting text.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+    example: Make stop signs clear and visible
+    max_chars: 81
+  - name: image
+    label: Local image path
+    type: image
+    required: true
+    example: assets/stop-sign.svg
+    max_chars: 720
+  - name: alt
+    label: Image description for accessibility
+    type: text
+    required: true
+    example: Red octagonal STOP sign with a white border and white lettering
+    max_chars: 360
+  - name: content
+    label: Supporting content
+    type: text
+    required: true
+    example: Clearly posted, visible stop signs give drivers an unmistakable cue to stop and make intersections more predictable for everyone.
+    max_chars: 1500
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
+body: |
+  <div class="content-slide">
+    <h2>{{title}}</h2>
+    <div class="image-text">
+      <img src="{{image}}" alt="{{alt}}">
+      <p>{{content}}</p>
+    </div>
+  </div>
+  <footer class="slide-footer">{{footer}}</footer>

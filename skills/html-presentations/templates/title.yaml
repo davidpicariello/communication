@@ -1,0 +1,34 @@
+name: Title slide
+description: Introduce the presentation with a title, subtitle, and optional presenter.
+fields:
+  - name: title
+    label: Slide title
+    type: heading
+    required: true
+    example: A safer city, one street at a time
+    max_chars: 108
+  - name: subtitle
+    label: Subtitle
+    type: text
+    required: false
+    example: A practical plan for safer everyday journeys
+    max_chars: 1200
+  - name: presenter
+    label: Presenter or organization
+    type: text
+    required: false
+    example: City Mobility Team
+    max_chars: 120
+  - name: footer
+    label: Footer text
+    type: text
+    required: false
+    example: Department of Public Safety and Awareness and Concern
+    max_chars: 160
+body: |
+  <div class="title-slide">
+    <p class="eyebrow">{{presenter}}</p>
+    <h1>{{title}}</h1>
+    <p class="subtitle">{{subtitle}}</p>
+  </div>
+  <footer class="slide-footer">{{footer}}</footer>
