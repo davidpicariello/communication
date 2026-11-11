@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -73,13 +74,17 @@ def render_slide(template: dict, values: dict[str, object]) -> str:
     body = str(template["body"])
     fields = template["fields"]
     assert isinstance(fields, list)
+    replacements: dict[str, str] = {}
     for field in fields:
         assert isinstance(field, dict)
         name = str(field["name"])
         token = "{{" + name + "}}"
         field_type = str(field.get("type", "text"))
         replacement = render_field(field_type, values.get(name, ""), field)
-        body = body.replace(token, replacement)
+        replacements.setdefault(token, replacement)
+    if replacements:
+        pattern = re.compile("|".join(re.escape(token) for token in replacements))
+        body = pattern.sub(lambda match: replacements[match.group(0)], body)
     return f'<section class="slide layout-{esc(template["id"])}">\n{body}\n</section>'
 
 
@@ -143,12 +148,29 @@ def render_source(source: dict) -> str:
         render_slide(available[slide["layout"]], slide["values"])
         for slide in normalized["slides"]
     ]
+    source_data = dict(normalized)
+    embedded_images = []
+    for slide_index, slide in enumerate(normalized["slides"]):
+        template = available[slide["layout"]]
+        for field in template["fields"]:
+            if field.get("type") == "image":
+                value = slide["values"][field["name"]]
+                if value and not value.startswith("data:"):
+                    embedded_images.append(
+                        {
+                            "slide": slide_index,
+                            "field": field["name"],
+                            "data_uri": render_field("image", value, field),
+                        }
+                    )
+    if embedded_images:
+        source_data["_embedded_images"] = embedded_images
     return make_deck(
         normalized["title"],
         normalized["theme"],
         normalized["size"],
         rendered,
-        source_data=normalized,
+        source_data=source_data,
     )
 
 

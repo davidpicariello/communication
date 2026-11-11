@@ -11,6 +11,7 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_ROOT = ROOT.parents[1]
 spec = importlib.util.spec_from_file_location("presentation_create", ROOT / "scripts" / "create.py")
 assert spec and spec.loader
 builder = importlib.util.module_from_spec(spec)
@@ -181,8 +182,8 @@ def main() -> None:
     clear_examples(output_dir)
     previous_directory = Path.cwd()
     try:
-        # Resolve image examples relative to the repository, regardless of where the script is run.
-        os.chdir(ROOT)
+        # Resolve shared image assets relative to the repository, regardless of where the script is run.
+        os.chdir(REPOSITORY_ROOT)
         templates = builder.templates()
         if not any(template["id"] == "title" for template in templates):
             raise ValueError("Cannot build root preview: no 'title' slide template found")

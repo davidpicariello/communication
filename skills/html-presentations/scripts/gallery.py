@@ -8,6 +8,7 @@ import importlib.util
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_ROOT = ROOT.parents[1]
 spec = importlib.util.spec_from_file_location("presentation_create", ROOT / "scripts" / "create.py")
 assert spec and spec.loader
 builder = importlib.util.module_from_spec(spec)
@@ -49,7 +50,9 @@ def main() -> None:
                     values[field["name"]] = example
                 elif field_type == "image" and example:
                     image_path = Path(example)
-                    values[field["name"]] = str(image_path if image_path.is_absolute() else ROOT / image_path)
+                    values[field["name"]] = str(
+                        image_path if image_path.is_absolute() else REPOSITORY_ROOT / image_path
+                    )
                 else:
                     values[field["name"]] = example
             elif field_type == "bullets":

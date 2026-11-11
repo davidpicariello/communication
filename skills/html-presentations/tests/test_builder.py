@@ -1,14 +1,18 @@
 import json
 import runpy
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
+ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_ROOT = ROOT.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts import create as builder
 from scripts.field_types import FieldType, register_field_type
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 class BuilderTests(unittest.TestCase):
@@ -63,7 +67,7 @@ class BuilderTests(unittest.TestCase):
                         self.assertTrue(all(isinstance(item, str) for item in example))
                     elif field.get("type") == "image":
                         self.assertIn("max_chars", field)
-                        self.assertTrue((ROOT / field["example"]).is_file())
+                        self.assertTrue((REPOSITORY_ROOT / field["example"]).is_file())
                     else:
                         self.assertIn("max_chars", field)
 
@@ -183,6 +187,25 @@ class BuilderTests(unittest.TestCase):
         self.assertIn("&lt;script&gt;", rendered)
         self.assertIn("one<br>two", rendered)
         self.assertNotIn("<script>", rendered)
+
+    def test_field_values_are_not_reprocessed_as_template_placeholders(self):
+        template = {
+            "id": "literal-placeholders",
+            "fields": [
+                {"name": "title", "type": "heading"},
+                {"name": "subtitle", "type": "text"},
+            ],
+            "body": "<h1>{{title}}</h1><p>{{subtitle}}</p><h2>{{title}}</h2>",
+        }
+
+        rendered = builder.render_slide(
+            template,
+            {"title": "How to use {{subtitle}}", "subtitle": "This must not replace the title token"},
+        )
+
+        self.assertIn("<h1>How to use {{subtitle}}</h1>", rendered)
+        self.assertIn("<p>This must not replace the title token</p>", rendered)
+        self.assertIn("<h2>How to use {{subtitle}}</h2>", rendered)
 
     def test_bullet_content_is_escaped(self):
         template = next(item for item in builder.templates() if item["id"] == "text-bullets")
@@ -342,6 +365,44 @@ class BuilderTests(unittest.TestCase):
             extracted_path = namespace["extract_source"](html_path, root / "sources")
             self.assertRegex(extracted_path.name, r"^presentation-source-[0-9a-f]{12}\.json$")
             self.assertEqual(json.loads(extracted_path.read_text(encoding="utf-8")), builder.validate_source(source))
+
+    def test_extracted_image_source_is_independent_of_original_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            image_path = root / "original.svg"
+            image_path.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>', encoding="utf-8")
+            source = {
+                "title": "Image deck",
+                "slides": [
+                    {
+                        "layout": "image-text",
+                        "values": {
+                            "title": "Example image",
+                            "image": str(image_path),
+                            "alt": "A stop sign",
+                            "content": "The image should remain recoverable.",
+                        },
+                    }
+                ],
+            }
+            deck = builder.render_source(source)
+            embedded = deck.split(
+                '<script type="application/json" id="presentation-source">', 1
+            )[1].split("</script>", 1)[0]
+            source_with_assets = json.loads(embedded)
+            self.assertIn("_embedded_images", source_with_assets)
+            self.assertEqual(source_with_assets["slides"][0]["values"]["image"], str(image_path))
+
+            html_path = root / "deck.html"
+            html_path.write_text(deck, encoding="utf-8")
+            image_path.unlink()
+            namespace = runpy.run_path(str(ROOT / "scripts" / "extract_source.py"), run_name="extract_source_test")
+            extracted_path = namespace["extract_source"](html_path, root / "sources")
+            recovered = json.loads(extracted_path.read_text(encoding="utf-8"))
+            image_data_uri = recovered["slides"][0]["values"]["image"]
+            self.assertTrue(image_data_uri.startswith("data:image/svg+xml;base64,"))
+            regenerated = builder.render_source(recovered)
+            self.assertIn(f'<img src="{image_data_uri}"', regenerated)
 
     def test_extract_source_errors_when_embedded_source_is_missing(self):
         with tempfile.TemporaryDirectory() as directory:

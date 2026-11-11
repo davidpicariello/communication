@@ -23,6 +23,35 @@ def extract_source(html_path: Path, output_dir: Path) -> Path:
     if not match:
         raise ValueError(f"No embedded presentation source found in {html_path}")
     source = json.loads(match.group(1))
+    if not isinstance(source, dict):
+        raise ValueError(f"Embedded presentation source in {html_path} must be an object")
+
+    # The generated deck carries image bytes alongside the original editable paths.
+    # Restore image fields as data URIs so the extracted JSON works without those files.
+    embedded_images = source.pop("_embedded_images", [])
+    if not isinstance(embedded_images, list):
+        raise ValueError("Embedded image data must be an array")
+    slides = source.get("slides")
+    if not isinstance(slides, list):
+        raise ValueError("Embedded presentation source has no valid slides array")
+    for image in embedded_images:
+        if not isinstance(image, dict):
+            raise ValueError("Embedded image entry must be an object")
+        slide_index = image.get("slide")
+        field_name = image.get("field")
+        data_uri = image.get("data_uri")
+        if (
+            not isinstance(slide_index, int)
+            or isinstance(slide_index, bool)
+            or not 0 <= slide_index < len(slides)
+            or not isinstance(field_name, str)
+            or not isinstance(data_uri, str)
+        ):
+            raise ValueError("Embedded image entry has invalid slide, field, or image data")
+        slide = slides[slide_index]
+        if not isinstance(slide, dict) or not isinstance(slide.get("values"), dict):
+            raise ValueError(f"Embedded image references invalid slide {slide_index + 1}")
+        slide["values"][field_name] = data_uri
 
     output_dir.mkdir(parents=True, exist_ok=True)
     while True:
